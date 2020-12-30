@@ -1,5 +1,5 @@
 # import evaluation
-from datasetTC.Production_prep import ProductionDataset
+from datasetTC.Dissipation_prep import DissipationDataset
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -13,17 +13,17 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 
 #%%
 
-P = ProductionDataset()
+D = DissipationDataset()
 
 #%%
 
-x_train_standard = P._set_normalization_values(test=False)
-x_test_standard = P._set_normalization_values(test=True)
+x_train_standard = D._set_normalization_values(test=False)
+x_test_standard = D._set_normalization_values(test=True)
 
 #%%
 
-y_train_shuffled = P.y_train_shuffled
-y_test = P.y_test
+y_train_shuffled = D.y_train_shuffled
+y_test = D.y_test
 
 
 #%%
@@ -34,7 +34,7 @@ def build_model(input_shape):
     The weights are initialised by providing the input_shape argument in the first layer.
     Your function should return the model.
     """
-    initializer = tf.keras.initializers.HeUnifrom()
+    initializer = tf.keras.initializers.HeUniform()
     regu = tf.keras.regularizers.l2(5e-4)
 
     model = tf.keras.Sequential([
@@ -42,7 +42,7 @@ def build_model(input_shape):
         BatchNormalization(),  # <- Batch normalisation layer
         Dense(64, activation='relu', kernel_regularizer=regu, kernel_initializer=initializer, bias_initializer='zeros', name='dense_two'),
         BatchNormalization(),
-        Dense(64, activation='relu', kernel_regularizer=regu, kernel_initializer=initializer, bias_initializer='zeros', name='dense_three'),
+        Dense(64, activation='relu', kernel_initializer=initializer, bias_initializer='zeros', name='dense_three'),
         BatchNormalization(),
         Dense(64, activation='relu', kernel_initializer=initializer, bias_initializer='zeros', name='dense_four'),
         BatchNormalization(),
@@ -106,7 +106,7 @@ def train_model(model, train_data, train_targets, epochs):
 
 #%%
 
-history = train_model(model, x_train_standard, y_train_shuffled, epochs=2000)
+history = train_model(model, x_train_standard, y_train_shuffled, epochs=20)
 
 #%%
 
@@ -117,12 +117,12 @@ y_test = np.array(y_test)
 y_test = np.reshape(y_test, y_test.shape[0])
 
 # creating dictionnary
-d = {'y/d': P.X_test['y/d'], 'pred_P': example_result, 'y_test': y_test}
+d = {'y/d': D.X_test['y/d'], 'pred_D': example_result, 'y_test': y_test}
 
 fig = plt.gcf()
 plt.figure
 sns.set(rc={'figure.figsize':(12,10)})
-ax = sns.lineplot(x = 'y/d', y = 'pred_P', marker="o", data = d)
+ax = sns.lineplot(x = 'y/d', y = 'pred_D', marker="o", data = d)
 ax = sns.lineplot(x = 'y/d', y = 'y_test', marker="o", data = d)
 ax.set_title('Validation with test value')
 plt.legend(['Predicted', 'Label'], loc='upper right')
@@ -132,7 +132,7 @@ fig.savefig('64_test.png', dpi=500)
 #%%
 
 # creating output file for test data
-d = {'y/d': P.X_test['y/d'], 'pred_P': example_result, 'y_test': y_test, 'mse': np.square(example_result-y_test)}
+d = {'y/d': D.X_test['y/d'], 'pred_D': example_result, 'y_test': y_test, 'mse': np.square(example_result-y_test)}
 output_df_test = pd.DataFrame(data=d).sort_values(by=['y/d'])
 output_df_test.to_excel("64_output_df_test.xlsx")
 #%%
@@ -147,19 +147,19 @@ output_df_loss.to_excel("64_output_df_loss.xlsx")
 
 #%%
 
-validate_batch = P._set_normalization_values_validation(test=False)
-validate_batch = model.predict(validate_batch[:77])
+validate_batch = D._set_normalization_values_validation(test=False)
+validate_batch = model.predict(validate_batch[:154])
 validate_batch = np.reshape(validate_batch, validate_batch.shape[0])
-y_train = np.array(P.y_train[:77])
+y_train = np.array(D.y_train[:154])
 y_train = np.reshape(y_train, y_train.shape[0])
 
 # creating dictionnary
-d = {'y/d': P.X_train['y/d'][:77], 'pred_P': validate_batch, 'y_train': y_train}
+d = {'y/d': D.X_train['y/d'][:154], 'pred_D': validate_batch, 'y_train': y_train}
 output_df_validation = pd.DataFrame(data=d).sort_values(by=['y/d'])
 fig = plt.gcf()
 plt.figure
 sns.set(rc={'figure.figsize':(12,10)})
-ax = sns.lineplot(x = 'y/d', y ='pred_P', marker="o", data = d)
+ax = sns.lineplot(x = 'y/d', y ='pred_D', marker="o", data = d)
 ax = sns.lineplot(x = 'y/d', y = 'y_train', data = d)
 plt.legend(['Training', 'Validation'], loc='upper right')
 ax.set_title('Validation with train value')
@@ -169,7 +169,7 @@ fig.savefig('64_validation.png', dpi=500)
 
 #%%
 # creating output file for validation data
-d = {'y/d': P.X_train['y/d'][:77], 'pred_P': validate_batch, 'y_train': y_train, 'mse': np.square(validate_batch-y_train)}
+d = {'y/d': D.X_train['y/d'][:154], 'pred_D': validate_batch, 'y_train': y_train, 'mse': np.square(validate_batch-y_train)}
 output_df_validation = pd.DataFrame(data=d).sort_values(by=['y/d'])
 output_df_validation.to_excel("64_output_df_validation.xlsx")
 

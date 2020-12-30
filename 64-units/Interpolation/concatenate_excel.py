@@ -25,7 +25,7 @@ class Remove_firstlast:
         # Correcting the dissipation on the wall to be 0
         # df.loc[df['y/d_i'] <= 0, 'Diss'] = 0
         # df = df[df['y/d_i'] > 0]
-        df = df[df['y/d_i'] <= 1]
+        # df = df[df['y/d_i'] <= 1]
         return df
 
     def _remove_flF(self, path) -> pd.DataFrame:

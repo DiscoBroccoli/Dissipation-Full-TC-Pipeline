@@ -21,7 +21,7 @@ class Remove_firstlast:
         print(f'Loading following dataset: {path}.')
         df = pd.read_excel(path)
         # df = df[df['y/d'] > 0]
-        df = df[df['y/d'] < 1]
+        # df = df[df['y/d'] < 1]
         return df
 
 
@@ -60,7 +60,7 @@ combined_D = pd.concat(frames_D)
 combined_DL = pd.concat(frames_DL)
 
 # write it out
-combined_D.to_excel("D_features.xlsx", header=False, index=False)
-combined_DL.to_excel("DL_label.xlsx", header=False, index=False)
+combined_D.to_excel("D_features_case.xlsx", header=False, index=False)
+combined_DL.to_excel("DL_label_case.xlsx", header=False, index=False)
 
 
